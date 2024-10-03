@@ -1,6 +1,12 @@
 package com.isaacudy.devfest.home
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,6 +61,14 @@ fun HomeScreen() {
         AnimatedContent(
             modifier = Modifier.weight(1f),
             targetState = containerGroup.activeContainer,
+            transitionSpec =  {
+                (fadeIn(animationSpec = tween(220, delayMillis = 110)) +
+                        scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 110)))
+                    .togetherWith(
+                        scaleOut(targetScale = 0.92f, animationSpec = tween(220)) +
+                                fadeOut(animationSpec = tween(220))
+                    )
+            }
         ) { activeContainer ->
             activeContainer.Render()
         }
