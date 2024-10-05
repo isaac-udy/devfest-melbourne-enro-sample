@@ -18,6 +18,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ fun SpeakerListScreen() {
     val speakers by remember { Dependencies.speakerRepository.listSpeakers() }.collectAsState()
 
     val listState = rememberLazyListState()
+    val isAtTopOfList = remember (listState){ derivedStateOf { !listState.canScrollBackward } }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
@@ -51,10 +53,14 @@ fun SpeakerListScreen() {
             stickyHeader {
                 ScreenTitle(
                     text = "Speakers",
-                    showBackground = listState.canScrollBackward,
+                    showBackground = !isAtTopOfList.value,
                 )
             }
-            items(speakers) { speaker ->
+            items(
+                items = speakers,
+                key = { it.id },
+                contentType = { "SpeakerItem" }
+            ) { speaker ->
                 ListItem(
                     modifier = Modifier.clickable {
                         navigation.push(SpeakerDetailDestination(speaker.id))
@@ -74,7 +80,7 @@ fun SpeakerListScreen() {
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            expanded = !listState.canScrollBackward,
+            expanded = isAtTopOfList.value,
             text = { Text("Add Speaker") },
             icon = { Icon(Icons.Default.PersonAddAlt1, null) }
         )

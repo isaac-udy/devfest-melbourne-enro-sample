@@ -18,6 +18,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -62,15 +63,20 @@ fun SessionListScreen(
     val speakers by viewModel.speakers.collectAsState()
 
     val listState = rememberLazyListState()
+    val isAtTopOfList = remember (listState){ derivedStateOf { !listState.canScrollBackward } }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(state = listState) {
             stickyHeader {
                 ScreenTitle(
                     text = "Sessions",
-                    showBackground = listState.canScrollBackward,
+                    showBackground = !isAtTopOfList.value,
                 )
             }
-            items(sessions) { session ->
+            items(
+                items = sessions,
+                key = { it.id },
+                contentType = { "SessionItem" }
+            ) { session ->
                 val speaker = remember { speakers.firstOrNull { it.id == session.speaker } }
                 ListItem(
                     modifier = Modifier.clickable {
@@ -89,7 +95,7 @@ fun SessionListScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            expanded = !listState.canScrollBackward,
+            expanded = isAtTopOfList.value,
             text = { Text("Add Session") },
             icon = { Icon(Icons.Default.BookmarkAdd, null) }
         )
